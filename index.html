@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="./fonts/fontawesome/css/all.min.css">
+    <title>Игра «Рыбки»</title>
+</head>
+<body>
+    <div id="myModal" class="modal fade" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Начало игры</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="userName" placeholder="Имя" maxlength="30">
+                        <label for="userName">Введите имя игрока</label>
+                        <div class="invalid-feedback">
+                            Имя игрока должно состоять только из букв и цифр. Длина имени не менее 2 и не более 50 символов.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="startGame">Старт</button>
+                    <button type="button" class="btn btn-primary" id="openRating">Рейтинг</button>
+                    <button type="button" class="btn btn-primary" id="openRule">Правила игры</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="modalRule" class="modal fade" role="dialog" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Правила игры</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        Ваша задача за <span id="secondsVisual"></span> секунд собрать максимальное количество баллов, кликая на рыбок. Одновременно на одном игровом поле может находиться не более 10 рыбок. Существуют рыбки 3 размеров. При клике на маленькую рыбку начисляется 30 очков, на среднюю – 20 очков, на большую – 10 очков. После клика по рыбке она исчезает, и начисляются очки. Каждая рыбка движется со случайными скоростью и траекторией. Рыбка не может находиться на игровом поле постоянно, со временем рыбка уплывает, если по ней так и не кликнули.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="closeRule">Прочитано</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid min-vh-100 d-flex flex-column align-items-center justify-content-lg-center">
+        <div class="row p-0 m-0 w-100 mt-lg-0 mt-3 justify-content-center">
+            <div class="col-12 p-0 m-0 d-flex justify-content-center gamePole">
+                    <canvas height="500" class="canvasPict elPos" id="canvasWater"></canvas>
+            </div>
+        </div>
+        <div class="row m-0 mt-3 p-0 justify-content-center info">
+            <div class="col-sm-7 col-12 p-0 m-0" id="userNameContainer">
+                <p>Пользователь: <span id="userNameGame"></span></p>
+            </div>
+            <div class="col-sm-5 col-12 p-0 m-0">
+                <p>Текущий счёт: <span id="points">0</span></p>
+            </div>
+            <hr class="p-0 m-0 mb-2">
+            <div class="col-sm-7 col-12 p-0 m-0">
+                <p id="timer">Таймер: <span id="minutes">00</span>:<span id="seconds">00</span></p>
+            </div>
+            <div class="col-sm-5 col-12 p-0 m-0">
+                <div class="row p-0 m-0 justify-content-center align-items-center">
+                    <div class="col-lg-4 col-4"><button class="p-0 btn btn-primary btn-sm w-100" type="button" id="setPause" value="pause" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Пауза" title="Пауза"><i class="fa-solid fa-pause"></i></button></div>
+                    <div class="col-lg-4 col-4"><button class="p-0 btn btn-primary btn-sm w-100" type="button" id="openRatingMiddle" value="rate" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Рейтинг" title="Рейтинг"><i class="fa-solid fa-star"></i></button></div>
+                    <div class="col-lg-4 col-4"><button class="p-0 btn btn-primary btn-sm w-100" type="button" id="restartButton" value="restartGame" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Новая игра" title="Новая игра"><i class="fa-solid fa-arrow-rotate-right"></i></button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="resModal" class="modal fade" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Результаты игры</h3>
+                </div>
+                <div class="modal-body">
+                    <p id="resinfo"></p>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-primary mr-auto" id="restartGame">Новая игра</button>
+                    <div>
+                        <button type="button" class="btn btn-primary" id="restartGameUser">Заново</button>
+                        <button type="button" class="btn btn-primary" id="openRatingFinish">Рейтинг</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalRating" class="modal fade" role="dialog" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Рейтинг игроков</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <table id="anonimTable" class="display rating">
+                        <thead>
+                        </thead>
+                    </table>
+                    <table id="allTable" class="display rating">
+                        <thead>
+                        </thead>
+                    </table>
+                    <div id="allCountUsers"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="closeRating">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="errorModal" class="modal fade" role="dialog" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content errorStyle">
+                <div class="modal-header">
+                    <h3 class="modal-title">Ошибка...</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <p>При считывании информации об игроках из базы данных произошла ошибка.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script> -->
+    <script src="./js/jquery.min.js"></script> 
+    <script src = "./js/jquery.dataTables.min.js"></script>
+    <script src="./js/bootstrap.bundle.min.js"></script>
+    <script src="./js/main.js"></script>
+</body>
+</html>
